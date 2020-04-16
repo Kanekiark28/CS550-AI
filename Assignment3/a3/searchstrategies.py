@@ -35,7 +35,8 @@ Manhattan - city block heuristic search.  To restrict the complexity of
 """
 
 import math
-
+from basicsearch_lib02.searchrep import Node
+from basicsearch_lib02.tileboard import TileBoard
 # For each of the following classes, create classmethods g and h
 # with the following signatures
 #       @classmethod
@@ -44,19 +45,60 @@ import math
 #       @classmethod
 #        def h(cls, state):
 #               return appropriate h value
- 
+
 
 class BreadthFirst:
     "BredthFirst - breadthfirst search"
-    pass
+    constant = 1
+
+    @classmethod
+    def g(cls, parentnode: Node, action, childnode: Node):
+        # goal depth
+        return len(childnode.path())
+
+    @classmethod
+    def h(cls, state: TileBoard):
+        return cls.constant
+
 
 class DepthFirst:
     "DepthFirst - depth first search"
-    pass
-        
+    @classmethod
+    def g(cls, parentnode: Node, action, childnode: Node):
+        return (parentnode.depth + 1) * -1
+
+    @classmethod
+    def h(cls, state: TileBoard):
+        return 0
+
+
 class Manhattan:
     "Manhattan Block Distance heuristic"
-    pass
-                
+    @classmethod
+    def g(cls, parentnode, action, childnode: Node):
+        return childnode.depth * 2
 
-       
+    @classmethod
+    def h(cls, state: TileBoard):
+        manhattan_val = 0
+
+        solved_states = [[None for c in range(
+            state.cols)] for r in range(state.rows)]
+
+        idx = 1
+        for row in range(state.boardsize):
+            for col in range(state.boardsize):
+                if row == state.rows // 2 and col == state.cols // 2:
+                    solved_states[row][col] = None
+                else:
+                    solved_states[row][col] = idx
+                    idx += 1
+
+        for row in range(state.boardsize):
+            for col in range(state.boardsize):
+                key = state.get(row, col)
+                for r in range(len(solved_states)):
+                    if key in solved_states[r]:
+                        manhattan_val += abs(r - row) + \
+                            abs(solved_states[r].index(key)-col)
+        return manhattan_val
